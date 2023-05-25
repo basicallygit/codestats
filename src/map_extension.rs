@@ -1,6 +1,6 @@
 #[inline]
-pub fn map_extension(ext: &String) -> &'static str {
-    match ext.as_str() {
+pub fn map_extension(ext: &str) -> &'static str {
+    match ext {
         "rs" => "Rust",
         "py" => "Python",
         "pyw" => "Python",

@@ -1,9 +1,9 @@
-use std::io::{BufRead, BufReader};
 use std::collections::HashMap;
-use std::process::exit;
-use std::path::Path;
-use std::fs::File;
 use std::env;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+use std::path::Path;
+use std::process::exit;
 
 mod map_extension;
 
@@ -35,23 +35,20 @@ impl Stats {
             for entry in contents.map(|e| e.unwrap().path()) {
                 if entry.is_dir() {
                     self.walk_dir(&entry);
-                }
-                else {
+                } else {
                     let mut validutf8 = true;
                     let mut lines = 0;
 
                     if let Ok(f) = File::open(&entry) {
                         for line in BufReader::new(f).lines() {
-                            if let Ok(_) = line {
+                            if line.is_ok() {
                                 lines += 1;
-                            }
-                            else {
+                            } else {
                                 validutf8 = false;
                                 break;
                             }
                         }
-                    }
-                    else {
+                    } else {
                         eprintln!("{}: Access denied", entry.display());
                         continue;
                     }
@@ -59,7 +56,7 @@ impl Stats {
                     if validutf8 {
                         let lang = match entry.extension() {
                             Some(ext) => ext.to_os_string().into_string().unwrap(),
-                            None => String::from("?")
+                            None => String::from("?"),
                         };
 
                         self.add_file(lang.clone());
@@ -67,8 +64,7 @@ impl Stats {
                     }
                 }
             }
-        }
-        else {
+        } else {
             eprintln!("{}: Access denied", dir.display());
         }
     }
@@ -84,13 +80,11 @@ fn main() {
         if !path.exists() {
             eprintln!("{}: No such file or directory", &argv[1]);
             exit(1);
-        }
-        else if path.is_file() {
+        } else if path.is_file() {
             eprintln!("{}: Item is a file, not a directory", &argv[1]);
             exit(1);
         }
-    }
-    else {
+    } else {
         path = Path::new(".");
     }
 
@@ -110,9 +104,11 @@ fn main() {
         if mapped == "?" {
             unknownlines += stats.linecount[ext];
             unknownfiles += stats.filecount[ext];
-        }
-        else {
-            println!("{:<10}\t{:<8}\t{:<10}", mapped, stats.linecount[ext], stats.filecount[ext]);
+        } else {
+            println!(
+                "{:<10}\t{:<8}\t{:<10}",
+                mapped, stats.linecount[ext], stats.filecount[ext]
+            );
         }
     }
 
